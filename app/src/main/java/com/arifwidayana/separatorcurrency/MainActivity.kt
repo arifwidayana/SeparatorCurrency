@@ -5,9 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import com.arifwidayana.separatorcurrency.databinding.ActivityMainBinding
-import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.util.*
@@ -32,21 +30,20 @@ class MainActivity : AppCompatActivity() {
                 override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
                 override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
                 override fun afterTextChanged(p0: Editable?) {
-                    if (etValue1.text.toString() == "") {
+                    if (p0.toString() == "") {
                         return
                     }
+                    val parsed = parseCurrencyValue(p0.toString())
                     etValue1.removeTextChangedListener(this)
-                    val parsed = parseCurrencyValue(etValue1.text.toString())
-                    val formatted = formatCurrency.format(parsed)
-                    etValue1.setText(formatted)
-                    etValue1.setSelection(formatted.length)
+                    etValue1.setText(parsed)
+                    etValue1.setSelection(parsed.length)
                     etValue1.addTextChangedListener(this)
                 }
             })
 
             btnSeparatorTextWatcher.setOnClickListener {
                 tvCur1.text = "Currency Value: ${etValue1.text}"
-                val addCleanCurrency = parseCurrencyValue(etValue1.text.toString())
+                val addCleanCurrency = etValue1.text.toString().replace("[Rp,.]".toRegex(),"")
                 tvCur2.text = "Original Value: $addCleanCurrency"
             }
             btnSeparatorNone.setOnClickListener {
@@ -55,20 +52,6 @@ class MainActivity : AppCompatActivity() {
                 tvCur2.text = "Original Value: ${etValue2.text}"
             }
         }
-    }
-
-    private fun parseCurrencyValue(value: String): BigDecimal {
-        try {
-            val replaceRegex = String.format(
-                "[%s,.]",
-                Objects.requireNonNull(formatCurrency.currency?.displayName)
-            )
-            val newCurrency = value.replace(replaceRegex.toRegex(), "")
-            return BigDecimal(newCurrency)
-        } catch (e: Exception) {
-            Log.e("Currency", e.message, e)
-        }
-        return BigDecimal.ZERO
     }
 
     override fun onStart() {
